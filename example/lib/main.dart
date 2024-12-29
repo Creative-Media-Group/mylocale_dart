@@ -7,6 +7,8 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -17,31 +19,42 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class TranslatorPage extends StatelessWidget {
-  static const file = "assets/localisation/localisation.csv";
-  static var locale = MyLocalization;
+class TranslatorPage extends StatefulWidget {
+  @override
+  _TranslatorPageState createState() => _TranslatorPageState();
+}
+
+class _TranslatorPageState extends State<TranslatorPage> {
+  String locale = MyLocalization().getDeviceLocale();
+  String translatedTitle = '';
+  String translatedContent = '';
+  String file = "assets/localisation/localisation.csv";
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTranslation();
+  }
+
+  Future<void> _loadTranslation() async {
+    final title = await translate(file, 'TITLE', locale);
+    final content = await translate(file, 'CONTENT', locale);
+
+    setState(() {
+      translatedTitle = title;
+      translatedContent = content;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('CSV Übersetzer')),
-      body: FutureBuilder<String>(
-        future: translate('assets/localisation/localisation.csv', 'DEMO',
-            locale), // Übersetzung laden
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator()); // Ladeanzeige
-          } else if (snapshot.hasError) {
-            return Center(
-                child: Text('Fehler: ${snapshot.error}')); // Fehleranzeige
-          } else {
-            return Center(
-              child: Text(
-                snapshot.data ?? 'Keine Übersetzung gefunden',
-                style: TextStyle(fontSize: 24),
-              ),
-            );
-          }
-        },
+      appBar: AppBar(title: Text(translatedTitle)),
+      body: Center(
+        child: Text(
+          translatedTitle,
+          style: TextStyle(fontSize: 24),
+        ),
       ),
     );
   }

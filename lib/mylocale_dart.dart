@@ -6,26 +6,32 @@
 // https://flutter.dev/to/pubspec-plugin-platforms.
 
 import 'mylocale_dart_platform_interface.dart';
-import 'dart:io';
+import 'package:flutter/services.dart';
+import 'package:csv/csv.dart';
 
 Future<String> translate(
     String csvFile, String targetKey, String langCode) async {
-  final file = File(csvFile);
-  final lines = await file.readAsLines();
+  // Lade die Datei aus dem Asset-Verzeichnis
+  final rawData = await rootBundle.loadString('assets/csv/$csvFile');
 
-  if (lines.isEmpty) return '';
+  // Konvertiere den Inhalt der CSV-Datei in eine Liste
+  List<List<dynamic>> csvData = CsvToListConverter().convert(rawData);
 
-  final headers = lines.first.split(',');
-  final rows = lines.skip(1).map((line) {
-    final values = line.split(',');
-    return Map<String, String>.fromIterables(headers, values);
-  });
+  if (csvData.isEmpty) return '';
+
+  // Spaltenüberschriften und Datenreihen verarbeiten
+  final headers = csvData.first.cast<String>();
+  final rows = csvData.skip(1);
 
   for (final row in rows) {
-    if (row['stringname'] == targetKey) {
-      // Falls die gewünschte Sprache leer ist, Fallback auf Englisch
-      return row[langCode]?.isEmpty ?? true ? row['en'] ?? '' : row[langCode]!;
+    final rowData =
+        Map<String, String>.fromIterables(headers, row.cast<String>());
+    if (rowData['stringname'] == targetKey) {
+      return rowData[langCode]?.isEmpty ?? true
+          ? rowData['en'] ?? ''
+          : rowData[langCode]!;
     }
   }
+
   return '';
 }
