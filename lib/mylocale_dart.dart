@@ -6,46 +6,26 @@
 // https://flutter.dev/to/pubspec-plugin-platforms.
 
 import 'mylocale_dart_platform_interface.dart';
-import 'dart:convert';
 import 'dart:io';
 
-class MylocaleDartTest {
-  Future<String?> getPlatformVersion() {
-    return MylocaleDartPlatform.instance.getPlatformVersion();
+Future<String> translate(
+    String csvFile, String targetKey, String langCode) async {
+  final file = File(csvFile);
+  final lines = await file.readAsLines();
+
+  if (lines.isEmpty) return '';
+
+  final headers = lines.first.split(',');
+  final rows = lines.skip(1).map((line) {
+    final values = line.split(',');
+    return Map<String, String>.fromIterables(headers, values);
+  });
+
+  for (final row in rows) {
+    if (row['stringname'] == targetKey) {
+      // Falls die gewünschte Sprache leer ist, Fallback auf Englisch
+      return row[langCode]?.isEmpty ?? true ? row['en'] ?? '' : row[langCode]!;
+    }
   }
-}
-
-class MylocaleDart {
-  Future<String> translate(
-      String csvFile, String targetKey, String langCode) async {
-    final file = File(csvFile);
-    if (!await file.exists()) {
-      throw Exception('Die Datei $csvFile existiert nicht.');
-    }
-
-    final lines = await file.readAsLines();
-    if (lines.isEmpty) {
-      throw Exception('Die Datei $csvFile ist leer.');
-    }
-
-    final headers = lines.first.split(',');
-
-    final rows = lines.skip(1).map((line) {
-      final values = line.split(',');
-      return Map<String, String>.fromIterables(headers, values);
-    }).toList();
-
-    for (final item in rows) {
-      if (item['stringname'] == targetKey) {
-        final langValue = item[langCode];
-        if (langValue == null || langValue.isEmpty) {
-          return item['en'] ?? '';
-        } else {
-          return langValue;
-        }
-      }
-    }
-
-    return '';
-  }
+  return '';
 }
