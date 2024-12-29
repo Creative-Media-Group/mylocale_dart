@@ -11,18 +11,11 @@ import 'package:csv/csv.dart';
 
 Future<String> translate(
     String csvFile, String targetKey, String langCode) async {
-  // Lade die Datei aus dem Asset-Verzeichnis
-  final rawData = await rootBundle.loadString('assets/csv/$csvFile');
-
-  // Konvertiere den Inhalt der CSV-Datei in eine Liste
+  final rawData = await rootBundle.loadString(csvFile);
   List<List<dynamic>> csvData = CsvToListConverter().convert(rawData);
-
   if (csvData.isEmpty) return '';
-
-  // Spaltenüberschriften und Datenreihen verarbeiten
   final headers = csvData.first.cast<String>();
   final rows = csvData.skip(1);
-
   for (final row in rows) {
     final rowData =
         Map<String, String>.fromIterables(headers, row.cast<String>());
@@ -32,6 +25,5 @@ Future<String> translate(
           : rowData[langCode]!;
     }
   }
-
   return '';
 }

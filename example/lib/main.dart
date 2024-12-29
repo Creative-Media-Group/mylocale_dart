@@ -20,11 +20,13 @@ class MyApp extends StatelessWidget {
 }
 
 class TranslatorPage extends StatefulWidget {
+  const TranslatorPage({super.key});
+
   @override
-  _TranslatorPageState createState() => _TranslatorPageState();
+  TranslatorPageState createState() => TranslatorPageState();
 }
 
-class _TranslatorPageState extends State<TranslatorPage> {
+class TranslatorPageState extends State<TranslatorPage> {
   String locale = MyLocalization().getDeviceLocale();
   String translatedTitle = '';
   String translatedContent = '';
