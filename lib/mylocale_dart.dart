@@ -15,7 +15,7 @@ Future<String> translate(
   List<List<dynamic>> csvData = CsvToListConverter().convert(rawData);
   if (csvData.isEmpty) return '';
   final headers = csvData.first.cast<String>();
-  final rows = csvData.skip(1);
+  final rows = csvData.skip(1); // Überspringe die Kopfzeile
   for (final row in rows) {
     final rowData =
         Map<String, String>.fromIterables(headers, row.cast<String>());
